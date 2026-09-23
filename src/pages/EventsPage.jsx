@@ -1,7 +1,7 @@
 import EventSection from "../components/EventSection";
 import { useEffect } from "react";
 
-function EventsPage({ events, onDeleteEvent }) {
+function EventsPage({ events, onDeleteEvent, onEditEvent }) {
     useEffect(()=>{
         fetch("http://localhost:5000/api/events")
         .then((response)=>response.json())
@@ -26,6 +26,7 @@ function EventsPage({ events, onDeleteEvent }) {
             <EventSection
                 events={events}
                 onDeleteEvent={onDeleteEvent}
+                onEditEvent={onEditEvent}
             />
         </>
     );

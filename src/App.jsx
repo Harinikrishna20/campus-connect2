@@ -12,6 +12,7 @@ import AboutPage from "./pages/AboutPage";
 
 function App() {
     const [events, setEvents] = useState([]);
+    const [editingEvent, setEditingEvent] = useState(null);
     useEffect(()=>{
             fetch("http://localhost:5000/api/events")
             .then((response)=>response.json())
@@ -21,7 +22,21 @@ function App() {
         }, []);
 
     function handleAddEvent(newEvent) {
-        setEvents([...events, newEvent]);
+        fetch("http://localhost:5000/api/events",{
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(newEvent)
+        }).then((response)=>response.json())
+        .then((data)=>{
+            console.log(data);
+            fetch("http://localhost:5000/api/events")
+            .then((response)=>response.json())
+            .then((data)=>{
+                setEvents(data);
+            });
+        });
     }
 
     function handleDeleteEvent(eventId) {
@@ -37,6 +52,32 @@ function App() {
             });
         });
     }
+    function handleEditEvent(eventId) {
+        const selectedEvent = events.find(function(event) {
+            return event.id === eventId;
+        });
+        setEditingEvent(selectedEvent || null);
+    }
+
+    function handleUpdateEvent(updatedEvent) {
+        fetch(`http://localhost:5000/api/events/${updatedEvent.id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(updatedEvent)
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                return fetch("http://localhost:5000/api/events");
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                setEvents(data);
+                setEditingEvent(null);
+            });
+    }
 
     return (
         <div>
@@ -50,6 +91,9 @@ function App() {
                             events={events}
                             onAddEvent={handleAddEvent}
                             onDeleteEvent={handleDeleteEvent}
+                            onEditEvent={handleEditEvent}
+                            editingEvent={editingEvent}
+                            onUpdateEvent={handleUpdateEvent}
                         />
                     }
                 />
@@ -60,6 +104,7 @@ function App() {
                         <EventsPage
                             events={events}
                             onDeleteEvent={handleDeleteEvent}
+                            onEditEvent={handleEditEvent}
                         />
                     }
                 />
